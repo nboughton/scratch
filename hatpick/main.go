@@ -17,13 +17,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	names := os.Args[2:]
+	items := os.Args[2:]
 
 	for i := 0; i < num; i++ {
-		n := len(names)
+		n := len(items)
 		p := rand.Intn(n)
 
-		fmt.Println(names[p])
-		names = append(names[:p], names[p+1:]...)
+		fmt.Println(items[p])
+		items = append(items[:p], items[p+1:]...)
 	}
 }
