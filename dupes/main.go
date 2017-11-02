@@ -58,7 +58,7 @@ func genData(dir string) (map[string]*File, []error) {
 	h, errors, bar := make(map[string]*File), []error{}, pb.StartNew(countFiles(dir))
 
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if !f.IsDir() {
+		if err == nil && !f.IsDir() {
 			sum, err := hashSum(path)
 			if err != nil {
 				errors = append(errors, err)
