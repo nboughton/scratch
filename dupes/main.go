@@ -38,7 +38,8 @@ func main() {
 	}
 
 	fmt.Println("Preparing. This may take some time.")
-	for _, r := range genData(dir) {
+	data, errors := genData(dir)
+	for _, r := range data {
 		if len(r.Paths) > 1 {
 			fmt.Printf("\nDuplicates found for %s\n", r.Paths[0])
 			for _, p := range r.Paths[1:] {
@@ -46,17 +47,23 @@ func main() {
 			}
 		}
 	}
+
+	fmt.Println("The following errors occurred during the run:")
+	for _, err := range errors {
+		fmt.Println(err)
+	}
 }
 
-func genData(dir string) map[string]*File {
-	h, bar := make(map[string]*File), pb.StartNew(countFiles(dir))
+func genData(dir string) (map[string]*File, []error) {
+	h, errors, bar := make(map[string]*File), []error{}, pb.StartNew(countFiles(dir))
 
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
 			sum, err := hashSum(path)
 			if err != nil {
-				sum = err.Error()
-				fmt.Println(err)
+				errors = append(errors, err)
+				bar.Increment()
+				return nil
 			}
 
 			// Create or append record
@@ -73,7 +80,7 @@ func genData(dir string) map[string]*File {
 	})
 	bar.Finish()
 
-	return h
+	return h, errors
 }
 
 func countFiles(dir string) int {
