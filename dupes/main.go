@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/md5"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 )
@@ -34,10 +35,26 @@ var h = make(map[string]*File)
 func main() {
 	// Check target dir
 	dir := os.Args[1]
+	fmt.Println("> Checking target directory.")
 	if _, err := os.Stat(dir); err == os.ErrNotExist {
 		fmt.Printf("No such directory [%s]\n", dir)
 		os.Exit(1)
 	}
+
+	// Get count of all files to be checked
+	fCount := 0
+	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
+		if !f.IsDir() {
+			fCount++
+		}
+
+		return nil
+	})
+	fmt.Printf("> Files to process: %d\n", fCount)
+
+	fmt.Println("> Processing directory. This may take some time.")
+	done := make(chan bool, 1)
+	go printProgress(fCount, done)
 
 	// Walk dir tree and populate hash
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
@@ -55,12 +72,16 @@ func main() {
 				h[sum].AddPath(path)
 			}
 
+			done <- true
+
 		}
 
 		return nil
 	})
+	close(done)
 
 	// Iterate data to show duplicates
+	fmt.Println("Report:")
 	for _, r := range h {
 		if len(r.Paths) > 1 {
 			fmt.Printf("Duplicates found for %s\n", r.Paths[0])
@@ -87,4 +108,21 @@ func md5Sum(path string) (string, error) {
 	}
 
 	return string(h.Sum(nil)), nil
+}
+
+func printProgress(t int, done chan bool) {
+	dCount, pcNext := 0, 10
+	fmt.Print("> [")
+
+	for range done {
+		dCount++
+
+		pc := int(math.Ceil(float64(dCount) / float64(t) * 100))
+		if pc%10 == 0 && pc == pcNext {
+			fmt.Print("=")
+			pcNext += 10
+		}
+	}
+
+	fmt.Print("]")
 }
