@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"crypto/md5"
 	"fmt"
-	"math"
 	"os"
 	"path/filepath"
 
