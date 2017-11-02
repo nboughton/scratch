@@ -55,7 +55,8 @@ func genData(dir string) map[string]*File {
 		if !f.IsDir() {
 			sum, err := hashSum(path)
 			if err != nil {
-				sum = "Could Not Read"
+				sum = err.Error()
+				fmt.Println(err)
 			}
 
 			// Create or append record
