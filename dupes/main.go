@@ -30,38 +30,32 @@ func (f *File) AddPath(path string) {
 	f.Paths = append(f.Paths, path)
 }
 
-// Map files to hash of File objects
-var h = make(map[string]*File)
-
 func main() {
-	// Check target dir
 	dir := os.Args[1]
-	fmt.Println("> Checking target directory.")
 	if _, err := os.Stat(dir); err == os.ErrNotExist {
 		fmt.Printf("No such directory [%s]\n", dir)
 		os.Exit(1)
 	}
 
-	// Get count of all files to be checked
-	fCount := 0
-	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if !f.IsDir() {
-			fCount++
+	fmt.Println("Preparing. This may take some time.")
+	for _, r := range genData(dir) {
+		if len(r.Paths) > 1 {
+			fmt.Printf("\nDuplicates found for %s\n", r.Paths[0])
+			for _, p := range r.Paths[1:] {
+				fmt.Println("\t", p)
+			}
 		}
+	}
+}
 
-		return nil
-	})
-	fmt.Printf("> Files to process: %d\n", fCount)
+func genData(dir string) map[string]*File {
+	h, bar := make(map[string]*File), pb.StartNew(countFiles(dir))
 
-	// Walk dir tree and populate hash
-	fmt.Println("> Processing directory. This may take some time.")
-	bar := pb.StartNew(fCount)
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
 			sum, err := hashSum(path)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				sum = "Could Not Read"
 			}
 
 			// Create or append record
@@ -78,15 +72,21 @@ func main() {
 	})
 	bar.Finish()
 
-	// Iterate data to show duplicates
-	for _, r := range h {
-		if len(r.Paths) > 1 {
-			fmt.Printf("\nDuplicates found for %s\n", r.Paths[0])
-			for _, p := range r.Paths[1:] {
-				fmt.Println("\t", p)
-			}
+	return h
+}
+
+func countFiles(dir string) int {
+	c := 0
+
+	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
+		if !f.IsDir() {
+			c++
 		}
-	}
+
+		return nil
+	})
+
+	return c
 }
 
 func hashSum(path string) (string, error) {
