@@ -7,6 +7,8 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 // File stores a copy of the md5 hash and paths to all files that
@@ -52,11 +54,9 @@ func main() {
 	})
 	fmt.Printf("> Files to process: %d\n", fCount)
 
-	fmt.Println("> Processing directory. This may take some time.")
-	done := make(chan bool, 1)
-	go printProgress(fCount, done)
-
 	// Walk dir tree and populate hash
+	fmt.Println("> Processing directory. This may take some time.")
+	bar := pb.StartNew(fCount)
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
 			sum, err := md5Sum(path)
@@ -72,13 +72,13 @@ func main() {
 				h[sum].AddPath(path)
 			}
 
-			done <- true
-
+			bar.Increment()
 		}
 
 		return nil
 	})
-	close(done)
+
+	bar.Finish()
 
 	// Iterate data to show duplicates
 	fmt.Println("Report:")
@@ -108,21 +108,4 @@ func md5Sum(path string) (string, error) {
 	}
 
 	return string(h.Sum(nil)), nil
-}
-
-func printProgress(t int, done chan bool) {
-	dCount, pcNext := 0, 10
-	fmt.Print("> [")
-
-	for range done {
-		dCount++
-
-		pc := int(math.Ceil(float64(dCount) / float64(t) * 100))
-		if pc%10 == 0 && pc == pcNext {
-			fmt.Print("=")
-			pcNext += 10
-		}
-	}
-
-	fmt.Print("]")
 }
