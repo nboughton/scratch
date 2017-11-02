@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"crypto/md5"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -58,7 +58,7 @@ func main() {
 	bar := pb.StartNew(fCount)
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
-			sum, err := md5Sum(path)
+			sum, err := hashSum(path)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
@@ -76,14 +76,12 @@ func main() {
 
 		return nil
 	})
-
 	bar.Finish()
 
 	// Iterate data to show duplicates
-	fmt.Println("Report:")
 	for _, r := range h {
 		if len(r.Paths) > 1 {
-			fmt.Printf("Duplicates found for %s\n", r.Paths[0])
+			fmt.Printf("\nDuplicates found for %s\n", r.Paths[0])
 			for _, p := range r.Paths[1:] {
 				fmt.Println("\t", p)
 			}
@@ -91,7 +89,7 @@ func main() {
 	}
 }
 
-func md5Sum(path string) (string, error) {
+func hashSum(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -99,11 +97,8 @@ func md5Sum(path string) (string, error) {
 	defer f.Close()
 
 	h := md5.New()
-	s := bufio.NewScanner(f)
-	for s.Scan() {
-		if _, err := h.Write(s.Bytes()); err != nil {
-			return "", err
-		}
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
 	}
 
 	return string(h.Sum(nil)), nil
