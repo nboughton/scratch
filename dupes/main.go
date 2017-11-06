@@ -1,12 +1,17 @@
 package main
 
 import (
-	"crypto/md5"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 
+	"github.com/nboughton/go-utils/input"
+	"github.com/nboughton/go-utils/regex/common"
 	"gopkg.in/cheggaaa/pb.v1"
 )
 
@@ -30,6 +35,33 @@ func (f *File) AddPath(path string) {
 	f.Paths = append(f.Paths, path)
 }
 
+// Keep removes the files at all paths except for the 1 specifed by its index number
+func (f *File) Keep(idx int) error {
+	if idx > len(f.Paths) {
+		return fmt.Errorf("Error: Invalid index: [%d]", idx)
+	}
+
+	for i := range f.Paths {
+		if i != idx {
+			fmt.Println("Removing: ", f.Paths[i])
+			if err := os.Remove(f.Paths[i]); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// Index returns the index values of all paths for file
+func (f *File) Index() (idx []string) {
+	for i, p := range f.Paths {
+		idx = append(idx, fmt.Sprintf("[%d] %s", i, p))
+	}
+
+	return idx
+}
+
 func main() {
 	dir := os.Args[1]
 	if _, err := os.Stat(dir); err == os.ErrNotExist {
@@ -41,16 +73,32 @@ func main() {
 	data, errors := genData(dir)
 	for _, r := range data {
 		if len(r.Paths) > 1 {
-			fmt.Printf("\nDuplicates found for %s\n", r.Paths[0])
-			for _, p := range r.Paths[1:] {
+			fmt.Printf("\nDupes found for %s\n", r.Paths[0])
+			for _, p := range r.Index() {
 				fmt.Println("\t", p)
+			}
+
+			fmt.Print("Remove dupes? [Y/n or index of file to keep]: ")
+			ans := input.ReadLine()
+			idx, err := strconv.Atoi(ans)
+			if err != nil && !common.Yes.MatchString(ans) && ans != "" {
+				fmt.Println("No action taken. Continuing.")
+				continue
+			}
+
+			if err := r.Keep(idx); err != nil {
+				errors = append(errors)
+				fmt.Println(err)
+				os.Exit(1)
 			}
 		}
 	}
 
-	fmt.Println("The following errors occurred during the run:")
-	for _, err := range errors {
-		fmt.Println(err)
+	if len(errors) > 0 {
+		fmt.Println("\nThe following errors occurred during the run:")
+		for _, err := range errors {
+			fmt.Println(err)
+		}
 	}
 }
 
@@ -58,10 +106,11 @@ func genData(dir string) (map[string]*File, []error) {
 	h, errors, bar := make(map[string]*File), []error{}, pb.StartNew(countFiles(dir))
 
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if err == nil && !f.IsDir() {
+		if validFile(f) {
 			sum, err := hashSum(path)
 			if err != nil {
 				errors = append(errors, err)
+				fmt.Println(err)
 				bar.Increment()
 				return nil
 			}
@@ -74,6 +123,7 @@ func genData(dir string) (map[string]*File, []error) {
 			}
 
 			bar.Increment()
+			time.Sleep(time.Millisecond)
 		}
 
 		return nil
@@ -87,7 +137,7 @@ func countFiles(dir string) int {
 	c := 0
 
 	filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
-		if !f.IsDir() {
+		if validFile(f) {
 			c++
 		}
 
@@ -97,6 +147,14 @@ func countFiles(dir string) int {
 	return c
 }
 
+func validFile(f os.FileInfo) bool {
+	if !f.IsDir() && f.Size() > 0 && !strings.HasPrefix(f.Mode().String(), "L") {
+		return true
+	}
+
+	return false
+}
+
 func hashSum(path string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -104,7 +162,7 @@ func hashSum(path string) (string, error) {
 	}
 	defer f.Close()
 
-	h := md5.New()
+	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return "", err
 	}
