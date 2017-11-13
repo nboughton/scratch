@@ -5,15 +5,25 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 	"time"
 )
 
+var interval = 5
+
 func main() {
+	if len(os.Args) > 1 {
+		var err error
+		interval, err = strconv.Atoi(os.Args[1])
+		if err != nil {
+			log.Fatal("Invalid interval. Usage: sftptop [refresh interval]. Value of refresh interval must be an integer.")
+		}
+	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
 
-	for range time.NewTicker(time.Second * 5).C {
+	for range time.NewTicker(time.Second * time.Duration(interval)).C {
 		exec.Command("clear")
 
 		proc, err := exec.Command("ps", "aux").Output()
