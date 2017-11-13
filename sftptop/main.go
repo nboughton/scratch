@@ -16,11 +16,11 @@ var interval = 5
 func main() {
 	if len(os.Args) > 1 {
 		var err error
-		interval, err = strconv.Atoi(os.Args[1])
-		if err != nil {
+		if interval, err = strconv.Atoi(os.Args[1]); err != nil {
 			log.Fatal("Usage: sftptop [refresh interval]. Value of refresh interval must be an integer. If no value is specified then the interval defaults to", interval, "seconds")
 		}
 	}
+
 	w := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
 
 	for range time.NewTicker(time.Second * time.Duration(interval)).C {
