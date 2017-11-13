@@ -18,7 +18,7 @@ func main() {
 		var err error
 		interval, err = strconv.Atoi(os.Args[1])
 		if err != nil {
-			log.Fatal("Invalid interval. Usage: sftptop [refresh interval]. Value of refresh interval must be an integer.")
+			log.Fatal("Usage: sftptop [refresh interval]. Value of refresh interval must be an integer. If no value is specified then the interval defaults to", interval, "seconds")
 		}
 	}
 	w := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
