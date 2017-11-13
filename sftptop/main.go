@@ -32,7 +32,16 @@ func main() {
 				continue
 			}
 
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", strings.Replace(f[11], "@internal-sftp", "", -1), f[1], f[2], f[3], f[7], f[8])
+			var (
+				user   = strings.Replace(f[11], "@internal-sftp", "", -1)
+				pid    = f[1]
+				cpu    = f[2]
+				mem    = f[3]
+				status = f[7]
+				start  = f[8]
+			)
+
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", user, pid, cpu, mem, status, start)
 		}
 		w.Flush()
 	}
