@@ -28,7 +28,11 @@ func main() {
 			}
 
 			f := strings.Fields(line)
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", f[0], f[1], f[2], f[3], f[7], f[8])
+			if len(f) < 12 {
+				continue
+			}
+
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", strings.Replace(f[11], "@internal-sftp", "", -1), f[1], f[2], f[3], f[7], f[8])
 		}
 		w.Flush()
 	}
