@@ -10,15 +10,19 @@ import (
 	"time"
 )
 
-var interval = 5
+var (
+	interval = 5
+)
 
 func main() {
 	if len(os.Args) > 1 {
-		var err error
-		if interval, err = strconv.Atoi(os.Args[1]); err != nil {
-			fmt.Println("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to", interval, "seconds")
+		i, err := strconv.Atoi(os.Args[1])
+		if err != nil {
+			fmt.Println("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to ", interval, " seconds. Defaulting.")
 			os.Exit(1)
 		}
+
+		interval = i
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
