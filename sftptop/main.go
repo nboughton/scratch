@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -17,7 +16,8 @@ func main() {
 	if len(os.Args) > 1 {
 		var err error
 		if interval, err = strconv.Atoi(os.Args[1]); err != nil {
-			log.Fatal("Usage: sftptop [refresh interval]. Value of refresh interval must be an integer. If no value is specified then the interval defaults to", interval, "seconds")
+			fmt.Println("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to", interval, "seconds")
+			os.Exit(1)
 		}
 	}
 
@@ -28,7 +28,8 @@ func main() {
 
 		proc, err := exec.Command("ps", "aux").Output()
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 
 		fmt.Fprintln(w, "USER\tPID\tCPU\tMEM\tSTATUS\tSTART")
