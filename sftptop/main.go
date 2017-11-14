@@ -33,7 +33,7 @@ func main() {
 
 		load, err := exec.Command("uptime").Output()
 		fatal(err)
-		fmt.Println(string(load))
+		fmt.Println("LOAD:", string(load))
 
 		fmt.Fprintln(w, "USER\tPID\tCPU\tMEM\tSTATUS\tSTART")
 		proc, err := exec.Command("ps", "aux").Output()
