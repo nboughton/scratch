@@ -12,13 +12,14 @@ import (
 
 var (
 	interval = 5
+	usage    = fmt.Sprintf("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to %d seconds.", interval)
 )
 
 func main() {
 	if len(os.Args) > 1 {
 		i, err := strconv.Atoi(os.Args[1])
 		if err != nil {
-			fmt.Println("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to ", interval, " seconds. Defaulting.")
+			fmt.Println(usage)
 			os.Exit(1)
 		}
 
