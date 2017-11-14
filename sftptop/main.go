@@ -13,6 +13,7 @@ import (
 var (
 	interval = 1
 	usage    = fmt.Sprintf("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to %d second(s).", interval)
+	idStr    = "internal-sftp"
 )
 
 func main() {
@@ -40,7 +41,7 @@ func main() {
 		fatal(err)
 
 		for _, line := range strings.Split(string(proc), "\n") {
-			if !strings.Contains(line, "internal-sftp") {
+			if !strings.Contains(line, idStr) {
 				continue
 			}
 
@@ -50,7 +51,7 @@ func main() {
 			}
 
 			var (
-				user   = strings.Replace(f[11], "@internal-sftp", "", -1)
+				user   = strings.Replace(f[11], "@"+idStr, "", -1)
 				pid    = f[1]
 				cpu    = f[2]
 				mem    = f[3]
