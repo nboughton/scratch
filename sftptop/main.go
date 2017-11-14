@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	interval = 5
+	interval = 1
 	usage    = fmt.Sprintf("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to %d seconds.", interval)
 )
 
