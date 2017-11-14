@@ -26,12 +26,13 @@ func main() {
 	for range time.NewTicker(time.Second * time.Duration(interval)).C {
 		exec.Command("clear")
 
-		proc, err := exec.Command("ps", "aux").Output()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		load, err := exec.Command("uptime").Output()
+		fatal(err)
 
+		proc, err := exec.Command("ps", "aux").Output()
+		fatal(err)
+
+		fmt.Println(string(load))
 		fmt.Fprintln(w, "USER\tPID\tCPU\tMEM\tSTATUS\tSTART")
 		for _, line := range strings.Split(string(proc), "\n") {
 			if !strings.Contains(line, "internal-sftp") {
@@ -55,5 +56,12 @@ func main() {
 			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", user, pid, cpu, mem, status, start)
 		}
 		w.Flush()
+	}
+}
+
+func fatal(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
