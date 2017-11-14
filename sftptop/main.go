@@ -28,12 +28,12 @@ func main() {
 
 		load, err := exec.Command("uptime").Output()
 		fatal(err)
+		fmt.Println(string(load))
 
+		fmt.Fprintln(w, "USER\tPID\tCPU\tMEM\tSTATUS\tSTART")
 		proc, err := exec.Command("ps", "aux").Output()
 		fatal(err)
 
-		fmt.Println(string(load))
-		fmt.Fprintln(w, "USER\tPID\tCPU\tMEM\tSTATUS\tSTART")
 		for _, line := range strings.Split(string(proc), "\n") {
 			if !strings.Contains(line, "internal-sftp") {
 				continue
