@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	interval = 1
+	interval = 2
 	usage    = fmt.Sprintf("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to %d second(s).", interval)
 	idStr    = "internal-sftp"
 )
@@ -30,11 +30,11 @@ func main() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 4, 1, ' ', 0)
 
 	for range time.NewTicker(time.Second * time.Duration(interval)).C {
-		exec.Command("clear")
+		clear()
 
 		load, err := exec.Command("uptime").Output()
 		fatal(err)
-		fmt.Println("LOAD:", string(load))
+		fmt.Println(string(load))
 
 		fmt.Fprintln(w, "USER\tPID\tCPU\tMEM\tSTATUS\tSTART")
 		proc, err := exec.Command("ps", "aux").Output()
@@ -63,6 +63,12 @@ func main() {
 		}
 		w.Flush()
 	}
+}
+
+func clear() {
+	c := exec.Command("clear")
+	c.Stdout = os.Stdout
+	c.Run()
 }
 
 func fatal(err error) {
