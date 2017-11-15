@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	interval = 2
-	usage    = fmt.Sprintf("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to %d second(s).", interval)
-	idStr    = "notty"
+	interval    = 2
+	usage       = fmt.Sprintf("Usage: sftptop [refresh interval]\nValue of refresh interval must be an integer. If no value is specified then the interval defaults to %d second(s).", interval)
+	sftpSession = "notty"
 )
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 		fmt.Println(string(load))
 		fmt.Fprintln(w, "USER\tPID\tCPU\tMEM\tSTATUS\tSTART")
 		for _, line := range strings.Split(string(proc), "\n") {
-			if !strings.Contains(line, idStr) {
+			if !strings.Contains(line, sftpSession) {
 				continue
 			}
 
@@ -50,7 +50,7 @@ func main() {
 			}
 
 			var (
-				user   = strings.Replace(f[11], "@"+idStr, "", -1)
+				user   = strings.Replace(f[11], "@"+sftpSession, "", -1)
 				pid    = f[1]
 				cpu    = f[2]
 				mem    = f[3]
