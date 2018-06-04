@@ -89,7 +89,7 @@ func filename(title string) string {
 	num, text := 0, ""
 	_, err := fmt.Sscanf(title, "%d_-_%s", &num, &text)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		return title
 	}
 
