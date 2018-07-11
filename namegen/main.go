@@ -50,17 +50,17 @@ var vl = rollt.Table{
 	},
 }
 
-
+/*
 "y","ya","ue","ey","ei","ao",
 
 "ae","ai","eo","eu","iu","oa","oo",
 
 "ie","ea","a","e","i","o","u","ou",
 
-"io","ia","oi","ay","oe","oy","au",
+"io","ia","oi","ay","oe","ui","au",
 
-"ui","uo","ua","yo","yi","yu",
-
+"uo","ua","oy","yo","yi","yu",
+*/
 
 var con = rollt.List{
 	Name: "consonants",
