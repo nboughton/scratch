@@ -2,40 +2,41 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"math/big"
+
+	"github.com/nboughton/num"
 )
 
 func main() {
+	fmt.Println(num.DecToFrac(0.245))
+	/*
+		a := 649.
+		b := 200.
 
-	a := 649.
-	b := 200.
+		c := a / b
 
-	c := a / b
+		i, frac := math.Modf(c)
+		fmt.Println(a, b, c, i, frac)
 
-	i, frac := math.Modf(c)
-	fmt.Println(a, b, c, i, frac)
+		var (
+			i2    int
+			frac2 float64
+		)
+		fmt.Sscanf(fmt.Sprint(c), "%d%f", &i2, &frac2)
+		fmt.Println(a, b, c, i2, frac2)
 
-	var (
-		i2    int
-		frac2 float64
-	)
-	fmt.Sscanf(fmt.Sprint(c), "%d%f", &i2, &frac2)
-	fmt.Println(a, b, c, i2, frac2)
-
-	//r := big.NewRat(649, 200)
-	fmt.Println(big.NewRat(3, 3).Float64())
+		//r := big.NewRat(649, 200)
+		fmt.Println(big.NewRat(3, 3).Float64())
+	*/
 }
 
-func continuedFractions(f *big.Rat) []int64 {
+func continuedFractions(f *num.Frac) []int64 {
 	var (
 		res []int64
-		cf  func(r *big.Rat)
+		cf  func(r *num.Frac)
 	)
 
-	cf = func(r *big.Rat) {
-		n, _ := r.Float64()
-
+	cf = func(r *num.Frac) {
 		// This is a hack because math.Modf is weird
 		var (
 			i    int
@@ -57,13 +58,4 @@ func continuedFractions(f *big.Rat) []int64 {
 	cf(f)
 
 	return res
-}
-
-func simplify(r *big.Rat) *big.Rat {
-	gcd := new(big.Int).GCD(nil, nil, r.Num(), r.Denom())
-
-	a := new(big.Int).Div(r.Num(), gcd)
-	b := new(big.Int).Div(r.Denom(), gcd)
-
-	return new(big.Rat).SetFrac(a, b)
 }
