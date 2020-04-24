@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	fmt.Println(num.BigFactorial(5))
+	fmt.Println(num.BigFactorial(1))
 }
