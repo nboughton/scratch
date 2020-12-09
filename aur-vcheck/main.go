@@ -17,6 +17,16 @@ type config struct {
 	Versions []string `json:"versions,omitempty"`
 }
 
+type jsonOutput struct {
+	Text       string `json:"text,omitempty"`
+	Alt        string `json:"alt,omitempty"`
+	Tooltip    string `json:"tooltip,omitempty"`
+	Class      string `json:"class,omitempty"`
+	Percentage int    `json:"percentage,omitempty"`
+}
+
+var outfile = fmt.Sprintf("%s/tmp/aur-vcheck.json", os.Getenv(("HOME")))
+
 func main() {
 	confPath := "config.json"
 	// Check for config path
@@ -35,6 +45,7 @@ func main() {
 	if err := json.NewDecoder(f).Decode(&c); err != nil {
 		log.Fatalf("failed to decode config: %s", err)
 	}
+	f.Close()
 
 	// Check Versions
 	log.Println("Checking versions")
@@ -80,4 +91,27 @@ func main() {
 			ExpireTimeout: 10000,
 		})
 	}
+
+	// Write output for waybar module
+	n := len(out)
+	o := jsonOutput{
+		Text:    fmt.Sprintf("%d", n),
+		Alt:     fmt.Sprintf("%d", n),
+		Tooltip: strings.Join(out, "\n"),
+	}
+	if n > 0 {
+		o.Class = "updates"
+		o.Percentage = n
+	} else {
+		o.Class = "no-updates"
+		o.Percentage = 0
+	}
+
+	f, err = os.Create(outfile)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	json.NewEncoder(f).Encode(o)
+	f.Close()
 }
