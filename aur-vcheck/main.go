@@ -77,7 +77,7 @@ func main() {
 			Summary:       "AUR NPM Packages Need Updating",
 			Body:          strings.Join(out, "\n"),
 			Hints:         map[string]dbus.Variant{},
-			ExpireTimeout: 5,
+			ExpireTimeout: 10000,
 		})
 	}
 }
